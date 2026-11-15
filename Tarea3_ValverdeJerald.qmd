@@ -28,15 +28,98 @@ canal.interes <- par["canal.interes"]
 ```
 
 ## 0 - Hoja de respuestas
-
-```{r respuestas}
+```{r}
 #| echo: false
 r1  <- alerta.movil(df, ventana, k.alerta)
 r1c <- alerta.movil(df, 7, 2)
 
-cat("RESULTADO_1A =", sum(r1$alerta), "\n")
-cat("RESULTADO_1B =", as.character(min(r1$fecha[r1$alerta])), "\n")
-cat("RESULTADO_1C =", sum(r1c$alerta), "\n")
+cat("PREGUNTA 1\n")
+cat("1A =", sum(r1$alerta), "\n")
+cat("1B =", as.character(min(r1$fecha[r1$alerta])), "\n")
+cat("1C =", sum(r1c$alerta), "\n")
+cat("\n")
+
+mad_canal <- benford.mad(df$monto_crc[df$canal == canal.benford])
+cantones_benford <- benford.canton(df, canal.benford, can)
+cantones_web <- benford.canton(df, "Web", can)
+
+
+cat("PREGUNTA 2\n")
+cat("2A =", sprintf("%.4f", mad_canal), "\n")
+cat("2B =", cantones_benford$canton[1], "\n")
+cat("2C =", sum(cantones_benford$mad > 0.015), "\n")
+cat("2D =", cantones_web$canton[1], "\n")
 ```
 
-## Ejercicio 1 - Alertas por ventana móvil
+
+## Ejercicio 1 
+
+
+```{r}
+#| fig-width: 10
+#| fig-height: 5
+#| dpi: 300
+
+dir.create("info/figuras", recursive = TRUE, showWarnings = FALSE)
+
+g1 <- ggplot(r1, aes(x = fecha, y = n.tx)) +
+  geom_line(color = "gray45") +
+  geom_point(
+    data = subset(r1, alerta),
+    color = "red",
+    size = 2
+  ) +
+  labs(
+    title = "Transacciones diarias y alertas",
+    x = "Fecha",
+    y = "Número de transacciones",
+    caption = "Los puntos rojos indican días con alerta"
+  ) +
+  theme_minimal()
+
+print(g1)
+
+ggsave(
+  "info/figuras/ejercicio-1-alertas.png",
+  plot = g1,
+  width = 10,
+  height = 5,
+  dpi = 300
+)
+```
+
+## Ejercicio 2
+
+```{r}
+#| fig-width: 9
+#| fig-height: 5
+#| dpi: 300
+
+montos <- df$monto_crc[df$canal == canal.benford]
+montos <- montos[!is.na(montos) & montos > 0]
+digitos <- floor(montos / 10^floor(log10(montos)))
+
+benford_grafico <- data.frame(
+  digito = factor(1:9),
+  observada = tabulate(as.integer(digitos), nbins = 9) / length(digitos),
+  benford = log10(1 + 1 / (1:9))
+)
+
+g2 <- ggplot(benford_grafico, aes(x = digito)) +
+  geom_col(aes(y = observada), fill = "steelblue", alpha = 0.8) +
+  geom_line(aes(y = benford, group = 1), color = "red", linewidth = 1) +
+  geom_point(aes(y = benford), color = "red", size = 2) +
+  labs(
+    title = paste("Primer dígito y ley de Benford:", canal.benford),
+    x = "Primer dígito",
+    y = "Proporción",
+    caption = "Barras: proporción observada. Línea roja: proporción de Benford."
+  ) +
+  theme_minimal()
+
+print(g2)
+dir.create("info/figuras", recursive = TRUE, showWarnings = FALSE)
+ggsave("info/figuras/ejercicio-2-benford.png", g2,
+       width = 9, height = 5, dpi = 300)
+```
+
