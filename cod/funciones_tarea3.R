@@ -1,4 +1,6 @@
 # Ejercicio 1
+# Recibe las transacciones, el tamaño de la ventana y el multiplicador de alerta.
+# Devuelve una tabla diaria con el número de transacciones y las alertas.
 
 alerta.movil <- function(df, ventana, k.alerta) {
   df$fecha <- as.Date(df$fecha)
@@ -18,6 +20,7 @@ alerta.movil <- function(df, ventana, k.alerta) {
 }
 
 # Ejercicio 2
+
 
 # Recibe montos positivos y devuelve la desviación absoluta media
 # entre los primeros dígitos observados y la distribución de Benford.
@@ -71,4 +74,27 @@ benford.canton <- function(df, canal, cantones) {
   resultado <- resultado[order(resultado$mad, decreasing = TRUE), ]
   rownames(resultado) <- NULL
   resultado
+}
+
+#ejercicio 3
+# Recibe las transacciones, la tasa anual y el canal que se analizará.
+# Devuelve los montos mensuales, factores de acumulación, valor acumulado e interés.
+
+valor.acumulado <- function(df, tasa.anual, canal) {
+  df$fecha <- as.Date(df$fecha)
+  sub <- df[df$canal == canal, ]
+  sub$mes <- as.integer(format(sub$fecha, "%m"))
+  
+  totales <- aggregate(monto_crc ~ mes, data = sub, FUN = sum)
+  monto <- totales$monto_crc[match(1:12, totales$mes)]
+  monto[is.na(monto)] <- 0
+  
+  mes <- 1:12
+  tasa.mensual <- (1 + tasa.anual)^(1 / 12) - 1
+  factor <- (1 + tasa.mensual)^(12 - mes)
+  tabla <- data.frame(mes = mes, monto = monto, factor = factor)
+  va <- sum(tabla$monto * tabla$factor)
+  
+  list(tabla = tabla, tasa.mensual = tasa.mensual,
+       va = va, interes = va - sum(monto))
 }
