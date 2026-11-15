@@ -72,3 +72,24 @@ benford.canton <- function(df, canal, cantones) {
   rownames(resultado) <- NULL
   resultado
 }
+
+#ejercicio 3
+
+valor.acumulado <- function(df, tasa.anual, canal) {
+  df$fecha <- as.Date(df$fecha)
+  sub <- df[df$canal == canal, ]
+  sub$mes <- as.integer(format(sub$fecha, "%m"))
+  
+  totales <- aggregate(monto_crc ~ mes, data = sub, FUN = sum)
+  monto <- totales$monto_crc[match(1:12, totales$mes)]
+  monto[is.na(monto)] <- 0
+  
+  mes <- 1:12
+  tasa.mensual <- (1 + tasa.anual)^(1 / 12) - 1
+  factor <- (1 + tasa.mensual)^(12 - mes)
+  tabla <- data.frame(mes = mes, monto = monto, factor = factor)
+  va <- sum(tabla$monto * tabla$factor)
+  
+  list(tabla = tabla, tasa.mensual = tasa.mensual,
+       va = va, interes = va - sum(monto))
+}
