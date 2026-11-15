@@ -1,4 +1,6 @@
 # Ejercicio 1
+# Recibe las transacciones, el tamaño de la ventana y el multiplicador de alerta.
+# Devuelve una tabla diaria con el número de transacciones y las alertas.
 
 alerta.movil <- function(df, ventana, k.alerta) {
   df$fecha <- as.Date(df$fecha)
@@ -18,6 +20,7 @@ alerta.movil <- function(df, ventana, k.alerta) {
 }
 
 # Ejercicio 2
+
 
 # Recibe montos positivos y devuelve la desviación absoluta media
 # entre los primeros dígitos observados y la distribución de Benford.
@@ -74,6 +77,8 @@ benford.canton <- function(df, canal, cantones) {
 }
 
 #ejercicio 3
+# Recibe las transacciones, la tasa anual y el canal que se analizará.
+# Devuelve los montos mensuales, factores de acumulación, valor acumulado e interés.
 
 valor.acumulado <- function(df, tasa.anual, canal) {
   df$fecha <- as.Date(df$fecha)
