@@ -1,0 +1,42 @@
+---
+title: "Tarea 3 - Herramientas de Datos I"
+author: "Jerald Valverde - C4K608"
+format:
+  html:
+    embed-resources: true
+execute:
+  warning: false
+  message: false
+---
+
+```{r setup}
+#| include: false
+library(ggplot2)
+source("cod/funciones_tarea3.R")
+
+df  <- read.csv("data/transacciones_2025.csv", sep = ";")
+df$fecha <- as.Date(df$fecha)
+can <- read.csv("data/cantones.csv", encoding = "UTF-8")
+p   <- read.csv("config/parametros_tarea3.csv", sep = ";")
+par <- setNames(p$valor, p$parametro)
+
+ventana       <- as.numeric(par["ventana"])
+k.alerta      <- as.numeric(par["k.alerta"])
+canal.benford <- par["canal.benford"]
+tasa.anual    <- as.numeric(par["tasa.anual"])
+canal.interes <- par["canal.interes"]
+```
+
+## 0 - Hoja de respuestas
+
+```{r respuestas}
+#| echo: false
+r1  <- alerta.movil(df, ventana, k.alerta)
+r1c <- alerta.movil(df, 7, 2)
+
+cat("RESULTADO_1A =", sum(r1$alerta), "\n")
+cat("RESULTADO_1B =", as.character(min(r1$fecha[r1$alerta])), "\n")
+cat("RESULTADO_1C =", sum(r1c$alerta), "\n")
+```
+
+## Ejercicio 1 - Alertas por ventana móvil
